@@ -63,7 +63,7 @@
     "@github/local-action": "^7.0.1",
     "@pixpilot/dev-config": "^3.22.1",
     "@pixpilot/eslint-config": "^3.0.0",
-    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/git": "^10.0.1",
     "@types/mailparser": "^3.4.6",
     "@types/node": "^25.9.8",
