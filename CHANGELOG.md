@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/pixpilot/notify-action/compare/v1.2.0...v1.3.0) (2026-10-02)
+
+
+### Features
+
+* **notify:** enhance notification channel configuration and error handling ([aff4aaf](https://github.com/pixpilot/notify-action/commit/aff4aaf18687fb8dd2bca4d6147757665f92760f))
+
 # [1.2.0](https://github.com/pixpilot/notify-action/compare/v1.1.1...v1.2.0) (2026-09-24)
 
 
