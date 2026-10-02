@@ -5,11 +5,12 @@ Report a workflow's outcome to Telegram and/or email.
 By default it fires for every outcome, success included. Set
 `notify-on: failure, cancelled` to stay quiet while the pipeline is green.
 
-A channel is used when its credentials are set and skipped when they are not, so
-one step can cover both. **A notification that cannot be delivered does not fail
+A channel is skipped when both of its required inputs are unset. Incomplete
+configuration fails the step. **A notification that cannot be delivered does not fail
 your build** — it logs a warning and carries on, unless you opt in with
 `fail-on-error`. A broken alerting channel should not bury the failure it was
-reporting.
+reporting. With `fail-on-error: true`, a matching status also fails the step when
+no channel is configured.
 
 ## Usage
 
@@ -91,11 +92,12 @@ jobs:
 | `notify-on`     | `any`     | Statuses that trigger a notification, comma- or space-separated, for example `failure, cancelled`. `any` notifies on every outcome. |
 | `title`         | generated | Overrides the one-line title, which is also the email subject.                                                                      |
 | `message`       | —         | Extra text appended to the body.                                                                                                    |
-| `fail-on-error` | `false`   | Fail the step when a channel cannot deliver.                                                                                        |
+| `fail-on-error` | `false`   | Fail the step when a channel cannot deliver, or no channel is configured for a matching status.                                     |
 
 ### Telegram
 
-Skipped unless both `telegram-bot-token` and `telegram-chat-id` are set.
+Skipped when both `telegram-bot-token` and `telegram-chat-id` are unset. Setting
+only one fails the step.
 
 | Input                | Description                                                   |
 | -------------------- | ------------------------------------------------------------- |
@@ -111,7 +113,8 @@ read it from `https://api.telegram.org/bot<token>/getUpdates`.
 
 ### Email
 
-Skipped unless both `smtp-server` and `email-to` are set.
+Skipped when both `smtp-server` and `email-to` are unset. Setting only one fails
+the step.
 
 | Input           | Default  | Description                                                                                                  |
 | --------------- | -------- | ------------------------------------------------------------------------------------------------------------ |

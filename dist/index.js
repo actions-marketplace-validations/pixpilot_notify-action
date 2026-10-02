@@ -31119,7 +31119,12 @@ function parsePort(raw) {
 function readTelegramConfig(get) {
   const botToken = get("telegram-bot-token");
   const chatId = get("telegram-chat-id");
-  if (botToken.length === 0 || chatId.length === 0) return void 0;
+  if (botToken.length === 0 && chatId.length === 0) return void 0;
+  if (botToken.length === 0 || chatId.length === 0) {
+    throw new Error(
+      "Telegram requires both `telegram-bot-token` and `telegram-chat-id` - check that both secrets exist."
+    );
+  }
   const threadId = get("telegram-thread-id");
   return {
     botToken,
@@ -31130,7 +31135,10 @@ function readTelegramConfig(get) {
 function readEmailConfig(get) {
   const host = get("smtp-server");
   const to = parseList(get("email-to"));
-  if (host.length === 0 || to.length === 0) return void 0;
+  if (host.length === 0 && to.length === 0) return void 0;
+  if (host.length === 0 || to.length === 0) {
+    throw new Error("Email requires both `smtp-server` and `email-to`.");
+  }
   const port = parsePort(get("smtp-port"));
   const { secure, requireTls } = resolveSecurity(get("smtp-secure"), port);
   const username = get("smtp-username");
@@ -31183,10 +31191,10 @@ async function run() {
     }
     const channels = createChannels(inputs);
     if (channels.length === 0) {
-      warning(
-        "No notification channel is configured. Set `telegram-bot-token` and `telegram-chat-id`, and/or `smtp-server` and `email-to`."
-      );
+      const message = "No notification channel is configured. Set `telegram-bot-token` and `telegram-chat-id`, and/or `smtp-server` and `email-to`.";
       setOutputs({ notified: false, channels: [], failed: [], status });
+      if (inputs.failOnError) setFailed(message);
+      else warning(message);
       return;
     }
     const payload = buildPayload({

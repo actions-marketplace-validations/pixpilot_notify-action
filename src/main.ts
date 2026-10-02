@@ -41,10 +41,11 @@ export async function run(): Promise<void> {
 
     const channels = createChannels(inputs);
     if (channels.length === 0) {
-      core.warning(
-        'No notification channel is configured. Set `telegram-bot-token` and `telegram-chat-id`, and/or `smtp-server` and `email-to`.',
-      );
+      const message =
+        'No notification channel is configured. Set `telegram-bot-token` and `telegram-chat-id`, and/or `smtp-server` and `email-to`.';
       setOutputs({ notified: false, channels: [], failed: [], status });
+      if (inputs.failOnError) core.setFailed(message);
+      else core.warning(message);
       return;
     }
 
