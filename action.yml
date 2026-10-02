@@ -1,5 +1,5 @@
 name: Pixpilot Notify
-description: Report a workflow's outcome to Telegram and/or email, without failing the build
+description: Report a workflow's outcome to Telegram and/or email, with optional failure on delivery errors
 author: Pixpilot
 
 branding:
@@ -31,20 +31,21 @@ inputs:
 
   fail-on-error:
     description: >-
-      Fail the step when a channel cannot deliver. Defaults to `false`, so a
+      Fail the step when a channel cannot deliver or no channel is configured
+      for a matching status. Defaults to `false`, so a
       broken alerting channel never masks the failure it was reporting.
     required: false
     default: 'false'
 
   # --- Telegram ----------------------------------------------------------------------
   telegram-bot-token:
-    description: Telegram bot token from @BotFather. Telegram is skipped when empty.
+    description: Telegram bot token from @BotFather. Required when telegram-chat-id is set.
     required: false
 
   telegram-chat-id:
     description: >-
       Target chat id, for example `123456789`, `-1001234567890` for a group, or
-      `@channelname`. Telegram is skipped when empty.
+      `@channelname`. Required when telegram-bot-token is set.
     required: false
 
   telegram-thread-id:
@@ -53,7 +54,7 @@ inputs:
 
   # --- Email -------------------------------------------------------------------------
   email-to:
-    description: Recipients, separated by commas or spaces. Email is skipped when empty.
+    description: Recipients, separated by commas or spaces. Required when smtp-server is set.
     required: false
 
   email-from:
@@ -64,7 +65,7 @@ inputs:
     required: false
 
   smtp-server:
-    description: SMTP host, for example `smtp.gmail.com`. Email is skipped when empty.
+    description: SMTP host, for example `smtp.gmail.com`. Required when email-to is set.
     required: false
 
   smtp-port:

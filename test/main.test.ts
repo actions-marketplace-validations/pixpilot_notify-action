@@ -91,6 +91,37 @@ describe('main.ts', () => {
   });
 
   describe('when no channel is configured', () => {
+    it('should fail and publish outputs when fail-on-error is set', async () => {
+      withInputs({ status: 'failure', 'fail-on-error': 'true' });
+
+      await run();
+
+      expect(vi.mocked(core.setFailed)).toHaveBeenCalledWith(
+        expect.stringContaining('No notification channel is configured'),
+      );
+      expect(vi.mocked(core.warning)).not.toHaveBeenCalled();
+      expect(outputs()).toEqual({
+        notified: 'false',
+        channels: '',
+        'failed-channels': '',
+        status: 'failure',
+      });
+    });
+
+    it('should skip without failing when the status does not match in strict mode', async () => {
+      withInputs({
+        status: 'success',
+        'notify-on': 'failure',
+        'fail-on-error': 'true',
+      });
+
+      await run();
+
+      expect(vi.mocked(core.setFailed)).not.toHaveBeenCalled();
+      expect(vi.mocked(core.warning)).not.toHaveBeenCalled();
+      expect(outputs().notified).toBe('false');
+    });
+
     it('should warn rather than fail', async () => {
       withInputs({ status: 'failure' });
 
@@ -204,6 +235,25 @@ describe('main.ts', () => {
   });
 
   describe('when the inputs are invalid', () => {
+    it.each([
+      ['telegram-chat-id', '-100123', 'Telegram requires both'],
+      ['telegram-bot-token', 'BOT:secret', 'Telegram requires both'],
+      ['email-to', 'team@example.com', 'Email requires both'],
+      ['smtp-server', 'smtp.example.com', 'Email requires both'],
+    ])(
+      'should fail for incomplete configuration with only %s set',
+      async (input, value, message) => {
+        withInputs({ status: 'failure', [input]: value });
+
+        await run();
+
+        expect(vi.mocked(core.setFailed)).toHaveBeenCalledWith(
+          expect.stringContaining(message),
+        );
+        expect(fetchMock).not.toHaveBeenCalled();
+      },
+    );
+
     it('should fail with the validation message', async () => {
       withInputs({
         status: 'failure',

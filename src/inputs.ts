@@ -41,12 +41,17 @@ function parsePort(raw: string): number {
 
 /**
  * A channel is configured when the inputs that identify its destination are
- * present, so leaving a channel's inputs unset silently skips it.
+ * present. Leaving both unset skips it; setting only one is an error.
  */
 function readTelegramConfig(get: InputReader): TelegramConfig | undefined {
   const botToken = get('telegram-bot-token');
   const chatId = get('telegram-chat-id');
-  if (botToken.length === 0 || chatId.length === 0) return undefined;
+  if (botToken.length === 0 && chatId.length === 0) return undefined;
+  if (botToken.length === 0 || chatId.length === 0) {
+    throw new Error(
+      'Telegram requires both `telegram-bot-token` and `telegram-chat-id` - check that both secrets exist.',
+    );
+  }
 
   const threadId = get('telegram-thread-id');
   return {
@@ -59,7 +64,10 @@ function readTelegramConfig(get: InputReader): TelegramConfig | undefined {
 function readEmailConfig(get: InputReader): EmailConfig | undefined {
   const host = get('smtp-server');
   const to = parseList(get('email-to'));
-  if (host.length === 0 || to.length === 0) return undefined;
+  if (host.length === 0 && to.length === 0) return undefined;
+  if (host.length === 0 || to.length === 0) {
+    throw new Error('Email requires both `smtp-server` and `email-to`.');
+  }
 
   const port = parsePort(get('smtp-port'));
   const { secure, requireTls } = resolveSecurity(get('smtp-secure'), port);
@@ -86,6 +94,7 @@ function readEmailConfig(get: InputReader): EmailConfig | undefined {
   };
 }
 
+/** Reads action inputs and rejects incomplete channel configuration. */
 export function readInputs(get: InputReader): ActionInputs {
   const notifyOn = parseList(get('notify-on'));
 

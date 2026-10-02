@@ -55,14 +55,14 @@ describe('readInputs', () => {
       expect(readInputs(reader()).telegram).toBeUndefined();
     });
 
-    it('should be absent when only one of token and chat id is set', () => {
-      expect(
-        readInputs(reader({ 'telegram-bot-token': 'BOT:secret' })).telegram,
-      ).toBeUndefined();
-      expect(
-        readInputs(reader({ 'telegram-chat-id': '-100123' })).telegram,
-      ).toBeUndefined();
-    });
+    it.each(['telegram-bot-token', 'telegram-chat-id'])(
+      'should reject a missing %s when the other input is set',
+      (input) => {
+        expect(() => readInputs(reader({ ...telegramInputs, [input]: '' }))).toThrow(
+          'Telegram requires both `telegram-bot-token` and `telegram-chat-id`',
+        );
+      },
+    );
 
     it('should be present when both are set', () => {
       expect(readInputs(reader(telegramInputs)).telegram).toEqual({
@@ -84,14 +84,14 @@ describe('readInputs', () => {
       expect(readInputs(reader()).email).toBeUndefined();
     });
 
-    it('should be absent without a host or without recipients', () => {
-      expect(
-        readInputs(reader({ ...emailInputs, 'smtp-server': '' })).email,
-      ).toBeUndefined();
-      expect(
-        readInputs(reader({ ...emailInputs, 'email-to': '' })).email,
-      ).toBeUndefined();
-    });
+    it.each(['smtp-server', 'email-to'])(
+      'should reject a missing %s when the other input is set',
+      (input) => {
+        expect(() => readInputs(reader({ ...emailInputs, [input]: '' }))).toThrow(
+          'Email requires both `smtp-server` and `email-to`.',
+        );
+      },
+    );
 
     it('should split recipients on commas and whitespace', () => {
       const inputs = readInputs(
